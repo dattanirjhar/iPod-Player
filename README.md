@@ -10,16 +10,16 @@ A love letter to the 2000s era of digital music, bringing the tactile joy of the
 <br>
 
 <div align="center">
-  <img src="assets/IMG_0184.PNG" width="200" />
   <img src="assets/IMG_0185.PNG" width="200" />
   <img src="assets/IMG_0186.PNG" width="200" />
   <img src="assets/IMG_0187.PNG" width="200" />
+  <img src="assets/IMG_0188.PNG" width="200" />
 </div>
 
 <hr>
 
 <div align="center">
-  <img src="assets/IMG_0188.PNG" width="840" height="348" />
+  
 </div>
 
 <br>
