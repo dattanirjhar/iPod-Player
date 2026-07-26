@@ -45,10 +45,10 @@ struct AlbumCover: View {
 
     private var songListOverlay: some View {
         SongListView(album: album, isSelected: isSelected, isSongList: $isSongList)
-            .frame(width: 300, height: 280)
+            .frame(width: 300, height: 260)
             .background(Color.white)
             .border(.gray)
-            .offset(y: 35)
+            .offset(y: 15)
             .modifier(FlipOpacity(pct: isFaceUp ? 1 : 0))
             .rotation3DEffect(.degrees(isFaceUp ? 0 : 180), axis: (0, 1, 0))
             .scaleEffect(isFaceUp ? 1 : 160 / 300)

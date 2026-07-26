@@ -2,11 +2,18 @@ import SwiftUI
 
 struct PlaylistsView: View {
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
+    @EnvironmentObject private var playerManager: AppleMusicManager
+    @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var playlistManager = PlaylistManager()
     @Environment(\.navigate) private var navigate
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(UserDefaultsKeys.sortOrder.rawValue) private var sortOrderRaw: String = SortOrder.alphabetical.rawValue
     @State private var selectedIndex = 0
     @State private var viewState: ViewState = .loading
+
+    private var sortOrder: SortOrder {
+        SortOrder(rawValue: sortOrderRaw) ?? .alphabetical
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -25,11 +32,15 @@ struct PlaylistsView: View {
         .onDisappear {
             iPlayrController.saveCurrentIndex()
         }
+        .onChange(of: sortOrderRaw) { _, _ in
+            playlistManager.invalidateCache()
+            Task { await loadPlaylists() }
+        }
     }
     
     private func loadPlaylists() async {
         viewState = .loading
-        await playlistManager.fetchPlaylists()
+        await playlistManager.fetchPlaylists(sortOrder: sortOrder)
         
         if let playlists = playlistManager.playlists {
             if playlists.isEmpty {
@@ -83,6 +94,18 @@ struct PlaylistsView: View {
         switch action {
         case .menu: dismiss()
         case .select: navigation()
+        case .menuLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
+        case .playPauseLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
         default: break
         }
     }

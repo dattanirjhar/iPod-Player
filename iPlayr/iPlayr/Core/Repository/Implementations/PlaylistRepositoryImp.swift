@@ -4,8 +4,14 @@ import MusicKit
 @MainActor
 final class PlaylistRepositoryImpl: PlaylistRepositoryProtocol {
 
-    func currentUserPlaylist() async throws -> MusicItemCollection<Playlist>? {
-        let request = MusicLibraryRequest<Playlist>()
+    func currentUserPlaylist(sortOrder: SortOrder) async throws -> MusicItemCollection<Playlist>? {
+        var request = MusicLibraryRequest<Playlist>()
+        switch sortOrder {
+        case .alphabetical:
+            request.sort(by: \.name, ascending: true)
+        case .dateAdded:
+            request.sort(by: \.libraryAddedDate, ascending: false)
+        }
         let response = try await request.response()
         return response.items
     }

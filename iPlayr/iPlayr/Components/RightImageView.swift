@@ -33,7 +33,9 @@ struct RightImageView: View {
             }
         }
         .onReceive(albumManager.$savedAlbums) { albums in
-            guard !(albums?.isEmpty ?? true) else { return }
+            guard let albums, !albums.isEmpty else { return }
+            // Start from a random position rather than always index 0
+            currentImageIndex = Int.random(in: 0..<albums.count)
             startImageCycle()
         }
         .onDisappear(perform: stopImageCycle)
@@ -98,9 +100,15 @@ struct RightImageView: View {
         guard let albumsCount = albumManager.savedAlbums?.count,
               albumsCount > 1 else { return }
 
+        // Pick a random index that is different from the current one
+        var nextIndex: Int
+        repeat {
+            nextIndex = Int.random(in: 0..<albumsCount)
+        } while nextIndex == currentImageIndex
+
         withAnimation(.easeInOut(duration: transitionDuration)) {
             panDirection = panDirection == .right ? .left : .right
-            currentImageIndex = (currentImageIndex + 1) % albumsCount
+            currentImageIndex = nextIndex
         }
     }
 

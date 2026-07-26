@@ -1,131 +1,40 @@
 import SwiftUI
 import MusicKit
+import MediaPlayer
 
 struct PlayerView: View {
     let id: String
     let trackIndex: Int
     let isFromCoverFlow: Bool
     let isFromPlaylist: Bool
+    var isSingleSong: Bool = false
     var initialArtwork: Artwork?
     var onDismissFromCoverFlow: (() -> Void)? = nil
-    @State private var activeArtwork: Artwork?
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
     @EnvironmentObject private var playerManager: AppleMusicManager
-    @State private var currentDegree: Double = 80
-    @State private var currentOpacity: Double = 0
-    @State private var isScaleAnimation: Bool = true
-    @State private var seekTimer: Timer?
-    @State private var isSeekingForward: Bool = false
-    @State private var isSeekingBackward: Bool = false
-    @State private var seekStartTime: Date?
-    @State private var currentSeekSpeed: Double = 1.0
-
-    private let initialRotation: Double = 80
-    private let finalRotation: Double = 5
-    private let flipDuration: Double = 0.6
-    private let fadeDelay: Double = 0.3
-    private let fadeDuration: Double = 0.4
 
     var body: some View {
-        VStack(spacing: 0) {
-            if !isFromCoverFlow {
-                StatusBar(title: "Now Playing")
-            }
-            Spacer()
-            VStack {
-                HStack(spacing: 24) {
-                    ZStack {
-                        if let image = activeArtwork {
-                            ArtworkImage(image, width: 150)
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 150, height: 150)
-                                .reflection()
-                                .rotation3DEffect(.degrees(currentDegree), axis: (x: 0, y: 1, z: 0))
-                                .scaleEffect(isScaleAnimation ? 1.2 : 1)
-                                .id(playerManager.currentTrack?.title ?? "")
-                                .onAppear {
-                                    guard isFromCoverFlow else { return }
-                                    isScaleAnimation = true
-                                    currentDegree = initialRotation
-                                    currentOpacity = 0
-                                    DispatchQueue.main.async {
-                                        withAnimation(.snappy(duration: flipDuration)) {
-                                            isScaleAnimation = false
-                                            currentDegree = finalRotation
-                                        }
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + fadeDelay) {
-                                        withAnimation(.easeInOut(duration: fadeDuration)) {
-                                            currentOpacity = 1
-                                        }
-                                    }
-                                }
-                        } else {
-                            ProgressView()
-                        }
-                    }
-                    .frame(width: 150, height: 150)
-                    .onChange(of: playerManager.currentTrack) { _, newValue in
-                        if let newArtwork = newValue?.artwork {
-                            activeArtwork = newArtwork
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(playerManager.currentTrack?.title ?? "")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
-                            .id(playerManager.currentTrack?.title ?? "")
-                        Text(playerManager.currentTrack?.artistName ?? "")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.gray)
-                            .id(playerManager.currentTrack?.artistName ?? "")
-                        Text(playerManager.currentTrack?.albumTitle ?? "")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.gray)
-                            .id(playerManager.currentTrack?.albumTitle ?? "")
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .opacity(currentOpacity)
-                }
-                .frame(height: 180)
-                Spacer()
-                    .frame(height: 8)
-                SongProgressView()
-                    .environmentObject(playerManager)
-                    .opacity(currentOpacity)
-                    .id(playerManager.currentTrack?.title ?? "")
-                    .padding(.horizontal, -4)
-            }
-            .padding(.horizontal, 24)
-            Spacer()
-        }
-        .background(Color.white)
-        .frame(maxHeight: .infinity)
+        PlaybackDisplayView(
+            isFromCoverFlow: isFromCoverFlow,
+            showStatusBar: !isFromCoverFlow,
+            initialArtwork: initialArtwork
+        )
         .onAppear {
-            if let artwork = initialArtwork {
-                activeArtwork = artwork
-            } else {
-                activeArtwork = playerManager.currentTrack?.artwork
-            }
-            if !isFromCoverFlow {
-                currentDegree = finalRotation
-                currentOpacity = 1
-                isScaleAnimation = false
-            }
             iPlayrController.activePage = .player
             setupButtonListener()
             Task {
                 try? await Task.sleep(for: .milliseconds(200))
-                if isFromPlaylist {
+                if isSingleSong {
+                    try await playerManager.playSong(id: id)
+                } else if isFromPlaylist {
                     try await playerManager.playPlaylist(id: id, fromIndex: trackIndex)
                 } else {
                     try await playerManager.playAlbum(id: id, fromIndex: trackIndex)
                 }
             }
         }
-        .onDisappear { stopSeeking() }
         .navigationBarBackButtonHidden()
     }
 
@@ -150,164 +59,16 @@ struct PlayerView: View {
                     try? await playerManager.togglePlayPause()
                 }
             case .forwardLongPress:
-                startSeekingForward()
+                break
             case .forwardLongPressEnd:
-                stopSeeking()
+                break
             case .backwardLongPress:
-                startSeekingBackward()
+                break
             case .backwardLongPressEnd:
-                stopSeeking()
+                break
+            default:
+                break
             }
         }
-    }
-
-    private func startSeekingForward() {
-        guard !isSeekingForward && !isSeekingBackward else { return }
-        isSeekingForward = true
-        seekStartTime = Date()
-        currentSeekSpeed = 1.0
-
-        seekTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            Task {
-                await updateSeekSpeed()
-                await playerManager.seekForward(seconds: currentSeekSpeed)
-            }
-        }
-    }
-
-    private func startSeekingBackward() {
-        guard !isSeekingForward && !isSeekingBackward else { return }
-        isSeekingBackward = true
-        seekStartTime = Date()
-        currentSeekSpeed = 1.0
-
-        seekTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            Task {
-                await updateSeekSpeed()
-                await playerManager.seekBackward(seconds: currentSeekSpeed)
-            }
-        }
-    }
-
-    private func stopSeeking() {
-        seekTimer?.invalidate()
-        seekTimer = nil
-        isSeekingForward = false
-        isSeekingBackward = false
-        seekStartTime = nil
-        currentSeekSpeed = 1.0
-    }
-
-    @MainActor
-    private func updateSeekSpeed() {
-        guard let startTime = seekStartTime else { return }
-
-        let elapsedTime = Date().timeIntervalSince(startTime)
-        switch elapsedTime {
-        case 0..<1:
-            currentSeekSpeed = 1.0
-        case 1..<3:
-            currentSeekSpeed = 2.0
-        case 3..<5:
-            currentSeekSpeed = 5.0
-        case 5..<10:
-            currentSeekSpeed = 10.0
-        default:
-            currentSeekSpeed = 20.0
-        }
-    }
-}
-
-struct SongProgressView: View {
-    @State var progress: Double = 0
-    @EnvironmentObject private var playerManager: AppleMusicManager
-    @State private var visualProgress: Double = 0
-    @State private var timer: Timer?
-
-    private var currentDuration: TimeInterval {
-        playerManager.currentTrack?.duration ?? 0
-    }
-
-    var body: some View {
-        HStack(spacing: 0) {
-            Text(formattedTime(from: Int(visualProgress * currentDuration)))
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.black)
-                .frame(width: 50)
-                .multilineTextAlignment(.trailing)
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Color(.white).gradient.shadow(.inner(color: .black.opacity(0.1), radius: 10, x: 0, y: -2)))
-                        .frame(height: 18)
-                    Rectangle()
-                        .fill(Color(.white).gradient.shadow(.inner(color: .black.opacity(0.2), radius: 10, x: 0, y: 2)))
-                        .frame(height: 18)
-                    Rectangle()
-                        .fill(Color(.systemBlue).gradient.shadow(.inner(color: .white.opacity(0.2), radius: 8, x: 0, y: -4)))
-                        .frame(width: geo.size.width * CGFloat(visualProgress), height: 18)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: 18)
-            .padding(8)
-
-            Text("-\(formattedTime(from: Int(currentDuration - (visualProgress * currentDuration))))")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.black)
-                .frame(width: 50)
-                .multilineTextAlignment(.leading)
-        }
-        .frame(maxWidth: .infinity)
-        .onAppear(perform: startVisualTimer)
-        .onDisappear {
-            timer?.invalidate()
-            timer = nil
-        }
-        .onChange(of: currentDuration) { oldValue, newValue in
-            if abs(oldValue - newValue) > 1 {
-                progress = 0
-                visualProgress = 0
-                startVisualTimer()
-            }
-        }
-        .onChange(of: playerManager.isPlaying) { _, isPlaying in
-            if isPlaying {
-                startVisualTimer()
-            } else {
-                timer?.invalidate()
-                timer = nil
-            }
-        }
-        .onChange(of: playerManager.currentTrack?.title) { _, _ in
-            progress = 0
-            visualProgress = 0
-            timer?.invalidate()
-            timer = nil
-            if playerManager.isPlaying {
-                startVisualTimer()
-            }
-        }
-    }
-
-    @MainActor private func startVisualTimer() {
-        timer?.invalidate()
-        timer = nil
-
-        guard currentDuration > 0 else { return }
-
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            Task { @MainActor in
-                if playerManager.isPlaying {
-                    let currentTime = playerManager.currentPlaybackTime
-                    visualProgress = min(1.0, currentTime / currentDuration)
-                }
-            }
-        }
-    }
-
-    private func formattedTime(from seconds: Int) -> String {
-        let minutes = seconds / 60
-        let remainingSeconds = seconds % 60
-        return String(format: "%02d:%02d", minutes, remainingSeconds)
     }
 }

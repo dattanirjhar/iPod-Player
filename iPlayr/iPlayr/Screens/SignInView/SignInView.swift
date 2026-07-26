@@ -4,6 +4,8 @@ import MusicKit
 struct SignInView: View {
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
     @EnvironmentObject private var authManager: MusicAuthorizationManager
+    @EnvironmentObject private var playerManager: AppleMusicManager
+    @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.dismiss) private var dismiss
     @State private var isShowingModal = false
     @State private var menus: [Menu] = [
@@ -46,6 +48,18 @@ struct SignInView: View {
                 dismiss()
             case .select:
                 Task { await handleAppleMusicSignIn() }
+            case .menuLongPress:
+                if playerManager.currentTrack != nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        navigationManager.goToNowPlaying()
+                    }
+                }
+            case .playPauseLongPress:
+                if playerManager.currentTrack != nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        navigationManager.goToNowPlaying()
+                    }
+                }
             default:
                 break
             }

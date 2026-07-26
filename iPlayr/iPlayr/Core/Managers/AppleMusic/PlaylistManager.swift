@@ -13,10 +13,9 @@ final class PlaylistManager: ObservableObject {
         playlistRepository = PlaylistRepositoryImpl()
     }
     
-    func fetchPlaylists() async {
-        guard playlists == nil else { return }
+    func fetchPlaylists(sortOrder: SortOrder = .alphabetical) async {
         do {
-            let playlists = try await playlistRepository.currentUserPlaylist()
+            let playlists = try await playlistRepository.currentUserPlaylist(sortOrder: sortOrder)
             self.playlists = playlists ?? []
         } catch {
             errorMessage = "Request failed with error: \(error.localizedDescription)"
@@ -30,5 +29,9 @@ final class PlaylistManager: ObservableObject {
         } catch {
             errorMessage = "Request failed with error: \(error.localizedDescription)"
         }
+    }
+
+    func invalidateCache() {
+        playlists = nil
     }
 }

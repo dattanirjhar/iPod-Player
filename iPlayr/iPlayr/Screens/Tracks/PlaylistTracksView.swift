@@ -4,6 +4,8 @@ import MusicKit
 struct PlaylistTracksView: View {
     let collectionInfo: CollectionInfoModel
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
+    @EnvironmentObject private var playerManager: AppleMusicManager
+    @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var playlistManager = PlaylistManager()
     @Environment(\.navigate) private var navigate
     @Environment(\.dismiss) private var dismiss
@@ -85,6 +87,28 @@ struct PlaylistTracksView: View {
         switch action {
         case .menu: dismiss()
         case .select: navigation()
+        case .selectLongPress:
+            // Long-press center: jump to Now Playing if highlighted track is the current track
+            if let tracks = playlistManager.tracks,
+               selectedIndex < tracks.count,
+               let currentTrack = playerManager.currentTrack,
+               tracks[selectedIndex].id == currentTrack.id {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
+        case .menuLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
+        case .playPauseLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
         default: break
         }
     }

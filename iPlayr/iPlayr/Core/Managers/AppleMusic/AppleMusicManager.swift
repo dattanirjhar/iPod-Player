@@ -92,6 +92,22 @@ final class AppleMusicManager: ObservableObject {
         }
     }
 
+    func playSong(id: String) async throws {
+        currentTrack = nil
+        var request = MusicLibraryRequest<Song>()
+        request.filter(matching: \.id, equalTo: MusicItemID(id))
+        let response = try await request.response()
+
+        guard let song = response.items.first else {
+            throw MusicPlayerError.trackNotFound
+        }
+
+        let queue = ApplicationMusicPlayer.Queue(for: [song])
+        musicPlayer.queue = queue
+        try await musicPlayer.prepareToPlay()
+        try await musicPlayer.play()
+    }
+
     private func setupSongObserver() {
         musicPlayer.state.objectWillChange
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)

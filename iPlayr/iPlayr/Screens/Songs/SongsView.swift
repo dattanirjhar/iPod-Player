@@ -1,101 +1,105 @@
 import SwiftUI
 import MusicKit
 
-struct AlbumTracksView: View {
-    let collectionInfo: CollectionInfoModel
+struct SongsView: View {
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
     @EnvironmentObject private var playerManager: AppleMusicManager
     @EnvironmentObject private var navigationManager: NavigationManager
-    @StateObject private var albumManager = AlbumManager()
+    @StateObject private var songManager = SongManager()
     @Environment(\.navigate) private var navigate
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(UserDefaultsKeys.sortOrder.rawValue) private var sortOrderRaw: String = SortOrder.alphabetical.rawValue
     @State private var selectedIndex = 0
     @State private var viewState: ViewState = .loading
 
+    private var sortOrder: SortOrder {
+        SortOrder(rawValue: sortOrderRaw) ?? .alphabetical
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            StatusBar(title: collectionInfo.title)
+            StatusBar(title: "Songs")
+
             ZStack {
-                if viewState == .content {
-                    tracksScrollView
+                if viewState == ViewState.content {
+                    songsScrollView
                 }
                 StateView(state: viewState)
             }
         }
         .shadowedBackground()
+        .task { await loadSongs() }
         .onAppear(perform: setup)
-        .task { await loadTracks() }
         .navigationBarBackButtonHidden()
         .onDisappear {
             iPlayrController.saveCurrentIndex()
         }
+        .onChange(of: sortOrderRaw) { _, _ in
+            songManager.invalidateCache()
+            Task { await loadSongs() }
+        }
     }
-    
-    private func loadTracks() async {
+
+    private func loadSongs() async {
         viewState = .loading
-        await albumManager.getAlbumTracks(id: collectionInfo.id)
-        
-        if let tracks = albumManager.savedAlbumsTracks {
-            if tracks.isEmpty {
-                viewState = .empty(message: "No tracks found in this album")
+        await songManager.getAllSongs(sortOrder: sortOrder)
+
+        if let songs = songManager.savedSongs {
+            if songs.isEmpty {
+                viewState = .empty(message: "No songs found\nAdd some music to your library")
             } else {
-                iPlayrController.menuCount = tracks.count
+                iPlayrController.menuCount = songs.count
                 viewState = .content
             }
         } else {
-            viewState = .error(message: albumManager.errorMessage ?? "An error occurred\nPlease try again later")
+            viewState = .error(message: songManager.errorMessage ?? "An error occurred\nPlease try again")
         }
     }
-    
+
     @ViewBuilder
-    private var tracksScrollView: some View {
+    private var songsScrollView: some View {
         ScrollViewReader { scrollViewProxy in
-            ScrollView {
-                VStack(spacing: 0) {
-                    let savedTracks = albumManager.savedAlbumsTracks?.compactMap { $0 } ?? []
-                    let indexedTracks = Array(savedTracks.enumerated())
-                    
-                    ForEach(indexedTracks, id: \.offset) { index, track in
-                        MenuItemView(
-                            menu: Menu(id: index, name: track.title, next: selectedIndex == index),
-                            isSelected: selectedIndex == index
-                        )
-                        .id(index)
-                    }
+            if let savedSongs = songManager.savedSongs {
+                List(savedSongs.indices, id: \.self) { index in
+                    let song = savedSongs[index]
+                    CollectionMenuItem(
+                        model: song.toCollectionMenuModel(),
+                        isSelected: index == selectedIndex
+                    )
+                    .id(index)
+                    .listRowInsets(EdgeInsets())
                 }
+                .listStyle(.plain)
                 .onChange(of: iPlayrController.selectedIndex) { _, newIndex in
-                    guard iPlayrController.activePage == .albumTracks else { return }
+                    guard iPlayrController.activePage == .songs else { return }
                     selectedIndex = newIndex
                     scrollViewProxy.scrollTo(newIndex)
                 }
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        scrollViewProxy.scrollTo(selectedIndex)
-                    }
-                }
+            } else {
+                Text("No songs found")
             }
         }
     }
 
     private func setup() {
-        iPlayrController.setActivePage(.albumTracks, menuCount: albumManager.savedAlbumsTracks?.count ?? 0)
+        iPlayrController.setActivePage(.songs, menuCount: songManager.savedSongs?.count ?? 0)
         selectedIndex = iPlayrController.selectedIndex
-        
+
         iPlayrController.takeControl { action in
             handleButtonAction(action)
         }
     }
-    
+
     private func handleButtonAction(_ action: ButtonAction) {
         switch action {
         case .menu: dismiss()
-        case .select: navigation()
+        case .select: playSong()
         case .selectLongPress:
-            // Long-press center: jump to Now Playing if highlighted track is the current track
-            if let tracks = albumManager.savedAlbumsTracks,
-               selectedIndex < tracks.count,
+            // Long-press center: jump to Now Playing if highlighted song is the current track
+            if let savedSongs = songManager.savedSongs,
+               selectedIndex < savedSongs.count,
                let currentTrack = playerManager.currentTrack,
-               tracks[selectedIndex].id == currentTrack.id {
+               savedSongs[selectedIndex].id == currentTrack.id {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     navigationManager.goToNowPlaying()
                 }
@@ -115,11 +119,11 @@ struct AlbumTracksView: View {
         default: break
         }
     }
-    
-    private func navigation() {
+
+    private func playSong() {
+        guard let savedSongs = songManager.savedSongs, selectedIndex < savedSongs.count else { return }
+        let songId = savedSongs[selectedIndex].id.rawValue
         iPlayrController.releaseControl()
-        let id = collectionInfo.id
-        navigate(.push(.player(id: id, trackIndex: selectedIndex)))
+        navigate(.push(.songPlayer(songId: songId)))
     }
-    
 }

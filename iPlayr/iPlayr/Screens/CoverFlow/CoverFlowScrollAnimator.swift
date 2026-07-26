@@ -10,8 +10,8 @@ private final class DisplayLinkProxy: NSObject {
 final class CoverFlowScrollAnimator {
     private(set) var scrollOffset: CGFloat = 0
 
-    private let stiffness: CGFloat = 400
-    private let damping: CGFloat = 30
+    private let stiffness: CGFloat = 250
+    private let damping: CGFloat = 25
 
     private var velocity: CGFloat = 0
     private var targetOffset: CGFloat = 0

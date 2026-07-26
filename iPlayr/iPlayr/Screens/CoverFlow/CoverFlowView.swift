@@ -3,9 +3,16 @@ import MusicKit
 
 struct CoverFlowView: View {
     @EnvironmentObject var iPlayrController: iPlayrButtonController
+    @EnvironmentObject private var playerManager: AppleMusicManager
+    @EnvironmentObject private var navigationManager: NavigationManager
     @StateObject private var albumManager = AlbumManager()
     @State private var scrollAnimator = CoverFlowScrollAnimator()
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(UserDefaultsKeys.sortOrder.rawValue) private var sortOrderRaw: String = SortOrder.alphabetical.rawValue
+
+    private var sortOrder: SortOrder {
+        SortOrder(rawValue: sortOrderRaw) ?? .alphabetical
+    }
 
     @State private var albums: MusicItemCollection<Album> = []
     @State private var selectedIndex = 0
@@ -84,13 +91,14 @@ struct CoverFlowView: View {
                 .contentShape(Rectangle())
                 .simultaneousGesture(dragGesture)
 
-                Spacer().frame(height: 35)
+                if !albums.isEmpty {
+                    albumInfo
+                        .frame(height: 45)
+                } else {
+                    Spacer().frame(height: 45)
+                }
             }
             .zIndex(isSongList ? 2 : 0)
-
-            if !albums.isEmpty {
-                albumInfo
-            }
         }
     }
 
@@ -130,7 +138,9 @@ struct CoverFlowView: View {
     // MARK: - Navigation
 
     private func navigateTo(_ index: Int, updateController: Bool = true) {
-        selectedIndex = index
+        withAnimation(.easeInOut(duration: 0.2)) {
+            selectedIndex = index
+        }
         if updateController { iPlayrController.selectedIndex = index }
         scrollAnimator.jumpTo(scrollOffset + dragOffset)
         dragOffset = 0
@@ -164,7 +174,7 @@ struct CoverFlowView: View {
 
     private func loadAlbums() async {
         viewState = .loading
-        await albumManager.getCurrentUserSavedAlbums()
+        await albumManager.getCurrentUserSavedAlbums(sortOrder: sortOrder)
 
         guard let savedAlbums = albumManager.savedAlbums else {
             viewState = .error(message: albumManager.errorMessage ?? "An error occurred\nPlease try again")
@@ -199,6 +209,18 @@ struct CoverFlowView: View {
         switch action {
         case .menu:   handleMenuAction()
         case .select: handleSelectAction()
+        case .menuLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
+        case .playPauseLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
         default: break
         }
     }

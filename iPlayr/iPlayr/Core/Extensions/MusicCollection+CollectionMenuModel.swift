@@ -18,3 +18,15 @@ extension Track {
         CollectionMenuModel(artwork: artwork, name: title, description: artistName)
     }
 }
+
+extension Artist {
+    func toCollectionMenuModel() -> CollectionMenuModel {
+        CollectionMenuModel(artwork: artwork, name: name, description: "")
+    }
+}
+
+extension Song {
+    func toCollectionMenuModel() -> CollectionMenuModel {
+        CollectionMenuModel(artwork: artwork, name: title, description: artistName)
+    }
+}

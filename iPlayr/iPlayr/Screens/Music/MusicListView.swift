@@ -2,12 +2,16 @@ import SwiftUI
 
 struct MusicListView: View {
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
+    @EnvironmentObject private var playerManager: AppleMusicManager
+    @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.navigate) private var navigate
     @Environment(\.dismiss) private var dismiss
     private var menus: [Menu] = [
         .init(id: 0, name: "Cover Flow", next: true),
         .init(id: 1, name: "Playlists", next: true),
-        .init(id: 2, name: "Albums", next: true),
+        .init(id: 2, name: "Artists", next: true),
+        .init(id: 3, name: "Albums", next: true),
+        .init(id: 4, name: "Songs", next: true),
     ]
     @State private var selectedIndex: Int = 0
 
@@ -46,6 +50,18 @@ struct MusicListView: View {
             dismiss()
         case .select:
             navigation()
+        case .menuLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
+        case .playPauseLongPress:
+            if playerManager.currentTrack != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
         default: break
         }
     }
@@ -59,7 +75,9 @@ struct MusicListView: View {
         switch selectedIndex {
         case 0: route = .coverFlow
         case 1: route = .playlists
-        case 2: route = .albums
+        case 2: route = .artists
+        case 3: route = .albums
+        case 4: route = .songs
         default: route = .playlists
         }
 

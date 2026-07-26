@@ -37,6 +37,11 @@ enum Route: Hashable, Identifiable, Sendable {
     case player(id: String, trackIndex: Int, isFromCoverFlow: Bool = false, isFromPlaylist: Bool = false)
     case settings
     case albums
+    case artists
+    case artistAlbums(id: String, artistName: String)
+    case songs
+    case songPlayer(songId: String)
+    case nowPlaying
     
     var id: Route { self }
 }
@@ -68,6 +73,16 @@ extension Route {
             AlbumsView()
         case .albumTracks(id: let id, albumName: let albumName):
             AlbumTracksView(collectionInfo: CollectionInfoModel(id: id, title: albumName))
+        case .artists:
+            ArtistsView()
+        case .artistAlbums(let id, let artistName):
+            ArtistAlbumsView(artistId: id, artistName: artistName)
+        case .songs:
+            SongsView()
+        case .songPlayer(let songId):
+            PlayerView(id: songId, trackIndex: 0, isFromCoverFlow: false, isFromPlaylist: false, isSingleSong: true)
+        case .nowPlaying:
+            NowPlayingView()
         }
     }
 }

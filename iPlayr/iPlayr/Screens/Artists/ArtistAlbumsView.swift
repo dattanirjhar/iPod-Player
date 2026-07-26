@@ -1,24 +1,21 @@
 import SwiftUI
 import MusicKit
 
-struct AlbumsView: View {
+struct ArtistAlbumsView: View {
+    let artistId: String
+    let artistName: String
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
     @EnvironmentObject private var playerManager: AppleMusicManager
     @EnvironmentObject private var navigationManager: NavigationManager
-    @StateObject private var albumManager = AlbumManager()
+    @StateObject private var artistManager = ArtistManager()
     @Environment(\.navigate) private var navigate
     @Environment(\.dismiss) private var dismiss
-    @AppStorage(UserDefaultsKeys.sortOrder.rawValue) private var sortOrderRaw: String = SortOrder.alphabetical.rawValue
     @State private var selectedIndex = 0
     @State private var viewState: ViewState = .loading
 
-    private var sortOrder: SortOrder {
-        SortOrder(rawValue: sortOrderRaw) ?? .alphabetical
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            StatusBar(title: "Albums")
+            StatusBar(title: artistName)
 
             ZStack {
                 if viewState == ViewState.content {
@@ -34,41 +31,40 @@ struct AlbumsView: View {
         .onDisappear {
             iPlayrController.saveCurrentIndex()
         }
-        .onChange(of: sortOrderRaw) { _, _ in
-            albumManager.invalidateCache()
-            Task { await loadAlbums() }
-        }
     }
 
     private func loadAlbums() async {
         viewState = .loading
-        await albumManager.getCurrentUserSavedAlbums(sortOrder: sortOrder)
+        await artistManager.getArtistAlbums(artistName: artistId)
 
-        if let albums = albumManager.savedAlbums {
+        if let albums = artistManager.artistAlbums {
             if albums.isEmpty {
-                viewState = .empty(message: "No albums found\nAdd some albums to your library")
+                viewState = .empty(message: "No albums found\nfor this artist")
             } else {
                 iPlayrController.menuCount = albums.count
                 viewState = .content
             }
         } else {
-            viewState = .error(message: albumManager.errorMessage ?? "An error occurred\nPlease try again")
+            viewState = .error(message: artistManager.errorMessage ?? "An error occurred\nPlease try again")
         }
     }
 
     @ViewBuilder
     private var albumsScrollView: some View {
         ScrollViewReader { scrollViewProxy in
-            if let savedAlbums = albumManager.savedAlbums {
-                List(savedAlbums.indices, id: \.self) { index in
-                    let album = savedAlbums[index]
-                    albumRow(for: album, index: index)
-                        .id(index)
-                        .listRowInsets(EdgeInsets())
+            if let albums = artistManager.artistAlbums {
+                List(albums.indices, id: \.self) { index in
+                    let album = albums[index]
+                    CollectionMenuItem(
+                        model: album.toCollectionMenuModel(),
+                        isSelected: index == selectedIndex
+                    )
+                    .id(index)
+                    .listRowInsets(EdgeInsets())
                 }
                 .listStyle(.plain)
                 .onChange(of: iPlayrController.selectedIndex) { _, newIndex in
-                    guard iPlayrController.activePage == .albums else { return }
+                    guard iPlayrController.activePage == .artistAlbums else { return }
                     selectedIndex = newIndex
                     scrollViewProxy.scrollTo(newIndex)
                 }
@@ -78,16 +74,8 @@ struct AlbumsView: View {
         }
     }
 
-    @ViewBuilder
-    private func albumRow(for album: Album, index: Int) -> some View {
-        CollectionMenuItem(
-            model: album.toCollectionMenuModel(),
-            isSelected: index == selectedIndex
-        )
-    }
-
     private func setup() {
-        iPlayrController.setActivePage(.albums, menuCount: albumManager.savedAlbums?.count ?? 0)
+        iPlayrController.setActivePage(.artistAlbums, menuCount: artistManager.artistAlbums?.count ?? 0)
         selectedIndex = iPlayrController.selectedIndex
 
         iPlayrController.takeControl { action in
@@ -117,9 +105,9 @@ struct AlbumsView: View {
 
     private func navigation() {
         iPlayrController.releaseControl()
-        guard let savedAlbums = albumManager.savedAlbums, selectedIndex < savedAlbums.count else { return }
-        let id = savedAlbums[selectedIndex].id
-        let albumName = savedAlbums[selectedIndex].title
+        guard let albums = artistManager.artistAlbums, selectedIndex < albums.count else { return }
+        let id = albums[selectedIndex].id
+        let albumName = albums[selectedIndex].title
         navigate(.push(.albumTracks(id: id.rawValue, albumName: albumName)))
     }
 }

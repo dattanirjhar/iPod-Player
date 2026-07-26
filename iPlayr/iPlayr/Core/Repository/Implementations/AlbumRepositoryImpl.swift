@@ -11,8 +11,14 @@ final class AlbumRepositoryImpl: AlbumRepositoryProtocol {
         return album.tracks
     }
     
-    func getCurrentUserSavedAlbums() async throws -> MusicItemCollection<Album>? {
-        let request = MusicLibraryRequest<Album>()
+    func getCurrentUserSavedAlbums(sortOrder: SortOrder) async throws -> MusicItemCollection<Album>? {
+        var request = MusicLibraryRequest<Album>()
+        switch sortOrder {
+        case .alphabetical:
+            request.sort(by: \.title, ascending: true)
+        case .dateAdded:
+            request.sort(by: \.libraryAddedDate, ascending: false)
+        }
         let response = try await request.response()
         return response.items
     }

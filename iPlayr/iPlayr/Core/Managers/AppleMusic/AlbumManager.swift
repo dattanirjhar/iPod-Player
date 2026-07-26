@@ -21,10 +21,9 @@ final class AlbumManager: ObservableObject {
         }
     }
 
-    func getCurrentUserSavedAlbums() async {
-        guard savedAlbums == nil else { return }
+    func getCurrentUserSavedAlbums(sortOrder: SortOrder = .alphabetical) async {
         do {
-            let albums = try await albumRepository.getCurrentUserSavedAlbums()
+            let albums = try await albumRepository.getCurrentUserSavedAlbums(sortOrder: sortOrder)
             if let albums {
                 savedAlbums = albums
             } else {
@@ -33,5 +32,9 @@ final class AlbumManager: ObservableObject {
         } catch {
             errorMessage = "Request failed with error: \(error.localizedDescription)"
         }
+    }
+
+    func invalidateCache() {
+        savedAlbums = nil
     }
 }

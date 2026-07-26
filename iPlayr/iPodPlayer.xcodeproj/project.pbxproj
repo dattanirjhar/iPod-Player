@@ -7,24 +7,24 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		0C4A05AF2CD7B2570083D5C9 /* iPlayr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPlayr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C4A05AF2CD7B2570083D5C9 /* iPodPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPodPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0C4A06F02CD7D2EA0083D5C9 /* Exceptions for "iPlayr" folder in "iPlayr" target */ = {
+		0C4A06F02CD7D2EA0083D5C9 /* Exceptions for "iPlayr" folder in "iPodPlayer" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 0C4A05AE2CD7B2570083D5C9 /* iPlayr */;
+			target = 0C4A05AE2CD7B2570083D5C9 /* iPodPlayer */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0C4A05B12CD7B2570083D5C9 /* iPlayr */ = {
+		0C4A05B12CD7B2570083D5C9 /* iPodPlayer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				0C4A06F02CD7D2EA0083D5C9 /* Exceptions for "iPlayr" folder in "iPlayr" target */,
+				0C4A06F02CD7D2EA0083D5C9 /* Exceptions for "iPlayr" folder in "iPodPlayer" target */,
 			);
 			path = iPlayr;
 			sourceTree = "<group>";
@@ -45,7 +45,7 @@
 		0C4A05A62CD7B2560083D5C9 = {
 			isa = PBXGroup;
 			children = (
-				0C4A05B12CD7B2570083D5C9 /* iPlayr */,
+				0C4A05B12CD7B2570083D5C9 /* iPodPlayer */,
 				0C4A05B02CD7B2570083D5C9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 		0C4A05B02CD7B2570083D5C9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0C4A05AF2CD7B2570083D5C9 /* iPlayr.app */,
+				0C4A05AF2CD7B2570083D5C9 /* iPodPlayer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,7 +61,7 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0C4A05AE2CD7B2570083D5C9 /* iPlayr */ = {
+		0C4A05AE2CD7B2570083D5C9 /* iPodPlayer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0C4A05BD2CD7B2580083D5C9 /* Build configuration list for PBXNativeTarget "iPlayr" */;
 			buildPhases = (
@@ -74,13 +74,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0C4A05B12CD7B2570083D5C9 /* iPlayr */,
+				0C4A05B12CD7B2570083D5C9 /* iPodPlayer */,
 			);
-			name = iPlayr;
+			name = iPodPlayer;
 			packageProductDependencies = (
 			);
-			productName = iPlayr;
-			productReference = 0C4A05AF2CD7B2570083D5C9 /* iPlayr.app */;
+			productName = iPodPlayer;
+			productReference = 0C4A05AF2CD7B2570083D5C9 /* iPodPlayer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -114,7 +114,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0C4A05AE2CD7B2570083D5C9 /* iPlayr */,
+				0C4A05AE2CD7B2570083D5C9 /* iPodPlayer */,
 			);
 		};
 /* End PBXProject section */
@@ -193,7 +193,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = iPlayr;
+				INFOPLIST_KEY_CFBundleDisplayName = iPod;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
@@ -258,7 +258,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = iPlayr;
+				INFOPLIST_KEY_CFBundleDisplayName = iPod;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
@@ -289,7 +289,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iPlayr/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = iPlayr;
+				INFOPLIST_KEY_CFBundleDisplayName = iPod;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "iPlayr needs access to your Apple Music library to display albums, artists, and cover art, enhancing your music experience. This permission allows the app to fetch metadata but does not modify or manage your music.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -304,7 +304,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kerem.iPlayr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kerem.iPodPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -329,7 +329,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iPlayr/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = iPlayr;
+				INFOPLIST_KEY_CFBundleDisplayName = iPod;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "iPlayr needs access to your Apple Music library to display albums, artists, and cover art, enhancing your music experience. This permission allows the app to fetch metadata but does not modify or manage your music.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -344,7 +344,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kerem.iPlayr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kerem.iPodPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

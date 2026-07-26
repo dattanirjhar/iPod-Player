@@ -4,17 +4,35 @@ import MusicKit
 struct HomeListView: View {
     @EnvironmentObject private var iPlayrController: iPlayrButtonController
     @EnvironmentObject private var authManager: MusicAuthorizationManager
+    @EnvironmentObject private var playerManager: AppleMusicManager
+    @EnvironmentObject private var navigationManager: NavigationManager
     @Environment(\.navigate) private var navigate
     
+    /// Whether something is currently playing or paused (track loaded).
+    private var hasActiveTrack: Bool {
+        playerManager.currentTrack != nil
+    }
+    
     private var menus: [Menu] {
-        var baseMenus: [Menu] = [
-            .init(id: 0, name: "Music", next: true),
-            .init(id: 1, name: "Settings", next: true),
-        ]
-        if !authManager.isAuthorized {
-            baseMenus.append(.init(id: 2, name: "Sign In", next: true))
+        var items: [Menu] = []
+        var nextId = 0
+        
+        // Dynamic "Now Playing" — only appears when a track is loaded
+        if hasActiveTrack {
+            items.append(.init(id: nextId, name: "Now Playing", next: true))
+            nextId += 1
         }
-        return baseMenus
+        
+        items.append(.init(id: nextId, name: "Music", next: true))
+        nextId += 1
+        items.append(.init(id: nextId, name: "Settings", next: true))
+        nextId += 1
+        
+        if !authManager.isAuthorized {
+            items.append(.init(id: nextId, name: "Sign In", next: true))
+        }
+        
+        return items
     }
     
     @State private var selectedIndex: Int = 0
@@ -41,6 +59,15 @@ struct HomeListView: View {
                 selectedIndex = iPlayrController.selectedIndex
             }
         }
+        .onChange(of: hasActiveTrack) { _, _ in
+            // Update menu count when track availability changes
+            iPlayrController.menuCount = menus.count
+            // Clamp selected index if it's now out of bounds
+            if selectedIndex >= menus.count {
+                selectedIndex = max(0, menus.count - 1)
+                iPlayrController.selectedIndex = selectedIndex
+            }
+        }
         .onDisappear {
             iPlayrController.saveCurrentIndex()
         }
@@ -58,6 +85,21 @@ struct HomeListView: View {
     private func handleButtonAction(_ action: ButtonAction) {
         switch action {
         case .select: navigation()
+        case .menuLongPress:
+            // Long-press Menu from home → go to Now Playing if track is loaded
+            if hasActiveTrack {
+                // 50ms delay after haptic before transition
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
+        case .playPauseLongPress:
+            // Long-press Play/Pause → go to Now Playing
+            if hasActiveTrack {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    navigationManager.goToNowPlaying()
+                }
+            }
         case .playPause: break
         default: break
         }
@@ -66,13 +108,19 @@ struct HomeListView: View {
     private func navigation() {
         iPlayrController.releaseControl()
         let route: Route
-        switch selectedIndex {
-        case 0: route = .music
-        case 1:
+        let menuName = menus[selectedIndex].name
+        switch menuName {
+        case "Now Playing":
+            navigationManager.pushNowPlaying()
+            return
+        case "Music":
+            route = .music
+        case "Settings":
             route = .settings
-        case 2:
+        case "Sign In":
             route = .signIn
-        default: route = .music
+        default:
+            route = .music
         }
         navigate(.push(route))
     }

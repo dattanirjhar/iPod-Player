@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "0C4A05AE2CD7B2570083D5C9"
-               BuildableName = "iPlayr.app"
-               BlueprintName = "iPlayr"
-               ReferencedContainer = "container:iPlayr.xcodeproj">
+               BuildableName = "iPodPlayer.app"
+               BlueprintName = "iPodPlayer"
+               ReferencedContainer = "container:iPodPlayer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0C4A05AE2CD7B2570083D5C9"
-            BuildableName = "iPlayr.app"
-            BlueprintName = "iPlayr"
-            ReferencedContainer = "container:iPlayr.xcodeproj">
+            BuildableName = "iPodPlayer.app"
+            BlueprintName = "iPodPlayer"
+            ReferencedContainer = "container:iPodPlayer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0C4A05AE2CD7B2570083D5C9"
-            BuildableName = "iPlayr.app"
-            BlueprintName = "iPlayr"
-            ReferencedContainer = "container:iPlayr.xcodeproj">
+            BuildableName = "iPodPlayer.app"
+            BlueprintName = "iPodPlayer"
+            ReferencedContainer = "container:iPodPlayer.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
