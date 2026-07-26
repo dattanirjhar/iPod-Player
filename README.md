@@ -1,6 +1,6 @@
 <div align="center">
   
-# iPod Player
+# <img src="assets/app-icon.png" width="40" alt="iPod Player Logo" /> iPod Player
 
 **Experience the nostalgia of the iPod — reimagined for today.**  
 A love letter to the 2000s era of digital music, bringing the tactile joy of the Click Wheel and the magic of Cover Flow straight to your modern iOS device via SwiftUI and Apple Music.
@@ -10,10 +10,10 @@ A love letter to the 2000s era of digital music, bringing the tactile joy of the
 <br>
 
 <div align="center">
-  <img src="assets/IMG_0185.PNG" width="200" />
-  <img src="assets/IMG_0186.PNG" width="200" />
-  <img src="assets/IMG_0187.PNG" width="200" />
-  <img src="assets/IMG_0188.PNG" width="200" />
+  <img src="assets/14DCDD35-1715-4B11-A070-4B832578C829_1_201_a.jpeg" width="200" />
+  <img src="assets/57DA18A5-CBE4-4492-9DD7-5E6E6D7417D3_1_201_a.jpeg" width="200" />
+  <img src="assets/97B3365B-EDF9-43C0-9DB3-D5F675E067BC_1_201_a.jpeg" width="200" />
+  <img src="assets/E49881E2-4F98-4B70-BB5E-60B57EE86561_1_201_a.jpeg" width="200" />
 </div>
 
 <hr>
